@@ -12,22 +12,28 @@
 
 #include "pipex.h"
 
+void	error(void)
+{
+	perror("Error");
+	exit(1);
+}
+
 void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 {
 	int	input_file;
 
 	input_file = open(file1, O_RDONLY, 0777);
 	if (input_file == -1)
-		exit(1);
+		error();
 	if (dup2(fd[1], STDOUT_FILENO) == -1)
 	{
 		close(fd[0]);
-		exit(1);
+		error();
 	}
 	if (dup2(input_file, STDIN_FILENO) == -1)
 	{
 		close(fd[0]);
-		exit(1);
+		error();
 	}
 	close(fd[0]);
 	execute(cmd1, envp);
@@ -39,16 +45,16 @@ void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 
 	output_file = open(file2, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (output_file == -1)
-		exit(1);
+		error();
 	if (dup2(fd[0], STDOUT_FILENO) == -1)
 	{
 		close(fd[1]);
-		exit(1);
+		error();
 	}
 	if (dup2(output_file, STDIN_FILENO) == -1)
 	{
 		close(fd[1]);
-		exit(1);
+		error();
 	}
 	close(fd[1]);
 	execute(cmd2, envp);
@@ -77,5 +83,5 @@ int	main(int argc, char *argv[], char *envp[])
 	}
 	else
 		return (ft_putstr_fd("Wrong number of arguments\n", 2), 1);
-    return (0);
+	return (0);
 }

@@ -28,13 +28,18 @@ void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 	if (dup2(fd[1], STDOUT_FILENO) == -1)
 	{
 		close(fd[0]);
+		close(fd[1]);
+		close(input_file);
 		error();
 	}
+	close(fd[1]);
 	if (dup2(input_file, STDIN_FILENO) == -1)
 	{
 		close(fd[0]);
+		close(input_file);
 		error();
 	}
+	close(input_file);
 	close(fd[0]);
 	execute(cmd1, envp);
 }
@@ -48,15 +53,20 @@ void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 		error();
 	if (dup2(fd[0], STDOUT_FILENO) == -1)
 	{
+		close(fd[0]);
 		close(fd[1]);
+		close(output_file);
 		error();
 	}
+	close(fd[0]);
 	if (dup2(output_file, STDIN_FILENO) == -1)
 	{
 		close(fd[1]);
+		close(output_file);
 		error();
 	}
 	close(fd[1]);
+	close(output_file);
 	execute(cmd2, envp);
 }
 

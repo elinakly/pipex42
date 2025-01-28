@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/24 15:49:24 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/28 18:50:58 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	error(void)
 	exit(1);
 }
 
-void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
+static void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 {
 	int	input_file;
 
@@ -44,7 +44,7 @@ void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 	execute(cmd1, envp);
 }
 
-void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
+static void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 {
 	int	output_file;
 

@@ -7,7 +7,7 @@ CFLAGS = -Wall -Werror -Wextra -g
 OBJS_DIR  = objs
 LIBS	:= libft/libft.a printf/libftprintf.a -ldl -lglfw -pthread -lm
 
-SRCS = main.c
+SRCS = main.c get_next_line.c get_next_line_utils.c utils.c
 
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)
 

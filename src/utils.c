@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/28 20:02:58 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/29 19:35:54 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ void	free_arr(char **arr)
 		i++;
 	}
 	free(arr);
-	error();
 }
 
 static char	*find_valid_path(char *com, char **envp)
@@ -46,11 +45,17 @@ static char	*find_valid_path(char *com, char **envp)
 	{
 		path = ft_strjoin(paths[i], "/");
 		if (!paths)
+		{
 			free_arr(paths);
+			error();
+		}
 		find_full_path = ft_strjoin(path, com);
 		free(path);
 		if (!find_full_path)
+		{
 			free_arr(paths);
+			error();
+		}
 		if (access(find_full_path, F_OK) == 0)
 			return (free_arr(paths), find_full_path);
 		free(find_full_path);

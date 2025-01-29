@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 18:17:26 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/28 18:51:15 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/29 19:33:16 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,6 @@
 
 
 void		execute(char *command, char **envp);
-void	error(void);
+void		error(void);
 
 # endif

@@ -21,7 +21,7 @@
 # include <sys/wait.h>
 
 
-int		execute(char *command, char **envp);
+void		execute(char *command, char **envp);
 void	error(void);
 
 # endif

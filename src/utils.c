@@ -12,23 +12,51 @@
 
 #include "pipex.h"
 
-static char	find_valid_path(char *com, char **envp)
-{
-	
-}
-
-void	free_command(char **command)
+void	free_arr(char **arr)
 {
 	int	i;
 
 	i = 0;
-	while (command[i])
+	while (arr[i])
 	{
-		free(command[i]);
+		free(arr[i]);
 		i++;
 	}
-	free(command);
+	free(arr);
 	error();
+}
+
+static char	*find_valid_path(char *com, char **envp)
+{
+	int		i;
+	char 	**paths;
+	char 	*path;
+	char 	*find_full_path;
+
+	i = 0;
+	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
+		i++;
+	if (!envp[i])
+		error();
+	paths = ft_split(envp[i] + 5, ':');
+	if (!paths)
+		error();
+	i = 0;
+	while (paths[i])
+	{
+		path = ft_strjoin(paths[i], "/");
+		if (!paths)
+			free_arr(paths);
+		find_full_path = ft_strjoin(path, com);
+		free(path);
+		if (!find_full_path)
+			free_arr(paths);
+		if (access(find_full_path, F_OK) == 0)
+			return (free_arr(paths), find_full_path);
+		free(find_full_path);
+		i++;
+	}
+	return (free_arr(paths), NULL);
 }
 
 void	execute(char *com, char **envp)
@@ -46,13 +74,13 @@ void	execute(char *com, char **envp)
 	if (!find_path)
 	{
 		free(com);
-		free_command(command);
+		free_arr(command);
 		error();
 	}
 	if (execve(find_path, command, envp) == -1)
 	{
 		free(com);
-		free_command(command);
+		free_arr(command);
 		error();
 	}
 }

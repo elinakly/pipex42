@@ -35,10 +35,10 @@ static char	*find_valid_path(const char *com, char **envp)
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
 		i++;
 	if (!envp[i])
-		error(2);
+		return (NULL);
 	paths = ft_split(envp[i] + 5, ':');
 	if (!paths)
-		error(2);
+		return (NULL);
 	i = 0;
 	while (paths[i])
 	{
@@ -60,8 +60,8 @@ void	execute(char *com, char **envp)
 	command = ft_split(com, ' ');
 	if (!command)
 		exit(error(3));
-	find_path = find_valid_path(command[0], envp);
-	if (!find_path)
+	find_path = find_valid_path(command[0], envp); //malloc
+	if (find_path == NULL)
 	{
 		free_arr(command);
 		exit(error(3));

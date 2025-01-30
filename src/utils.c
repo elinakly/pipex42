@@ -28,9 +28,9 @@ void	free_arr(char **arr)
 static char	*find_valid_path(char *com, char **envp)
 {
 	int		i;
-	char 	**paths;
-	char 	*path;
-	char 	*find_full_path;
+	char	**paths;
+	char	*path;
+	char	*find_full_path;
 
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
@@ -44,7 +44,7 @@ static char	*find_valid_path(char *com, char **envp)
 	while (paths[i])
 	{
 		path = ft_strjoin(paths[i], "/");
-		if (!paths)
+		if (!path)
 		{
 			free_arr(paths);
 			error();
@@ -84,8 +84,9 @@ void	execute(char *com, char **envp)
 	}
 	if (execve(find_path, command, envp) == -1)
 	{
+		free(find_path);
 		free(com);
 		free_arr(command);
-		error();
+		exit(127);
 	}
 }

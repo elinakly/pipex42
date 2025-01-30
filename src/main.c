@@ -22,7 +22,7 @@ static void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 {
 	int	input_file;
 
-	input_file = open(file1, O_RDONLY, 0777);
+	input_file = open(file1, O_RDONLY);
 	if (input_file == -1)
 		error();
 	if (dup2(fd[1], STDOUT_FILENO) == -1)
@@ -32,16 +32,13 @@ static void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 		close(input_file);
 		error();
 	}
-	// fprintf(stderr, "%d\n", fd[1]);
 	close(fd[1]);
-	// fprintf(stderr, "%d\n", input_file);
 	if (dup2(input_file, STDIN_FILENO) == -1)
 	{
 		close(fd[0]);
 		close(input_file);
 		error();
 	}
-	// fprintf(stderr, "%d\n", input_file);
 	close(input_file);
 	close(fd[0]);
 	execute(cmd1, envp);
@@ -54,6 +51,7 @@ static void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 	output_file = open(file2, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (output_file == -1)
 		error();
+
 	if (dup2(fd[0], STDIN_FILENO) == -1)
 	{
 		close(fd[0]);
@@ -68,9 +66,8 @@ static void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 		close(output_file);
 		error();
 	}
-	close(fd[1]);
 	close(output_file);
-	exit(127);
+	close(fd[1]);
 	execute(cmd2, envp);
 }
 
@@ -100,12 +97,14 @@ int	main(int argc, char *argv[], char *envp[])
 				parent_funk(fd, argv[4], argv[3], envp);
 			else
 			{
+				close(fd[0]);
+				close(fd[1]);
 				if (waitpid(pid1, NULL, 0) == -1)
 					return (ft_putstr_fd("waitpid failed", 2), 1);
 				if (waitpid(pid2, &status, 0) == -1)
 					return (ft_putstr_fd("waitpid2 failed", 2), 1);
-				// if (WIFEXITED(status))
-				// 	status = WEXITSTATUS(status);
+				if (WIFEXITED(status))
+					status = WEXITSTATUS(status);
 			}
 		}
 	}

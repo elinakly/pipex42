@@ -6,12 +6,11 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/30 18:05:22 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/30 19:43:35 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-#include <linux/limits.h>
 
 void	free_arr(char **arr)
 {

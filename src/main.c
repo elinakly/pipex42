@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/30 18:14:44 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/30 20:08:27 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ static void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
 	execute(cmd1, envp);
 }
 
-static void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
+static void	child_2_funk(int *fd, char *file2, char *cmd2, char **envp)
 {
 	int	output_file;
 
@@ -80,11 +80,33 @@ static void	parent_funk(int *fd, char *file2, char *cmd2, char **envp)
 	execute(cmd2, envp);
 }
 
+int	pid_init(int *fd, int *status, char **argv, char **envp)
+{
+	int	pid1;
+	int	pid2;
+
+	pid1 = fork();
+	if (pid1 == -1)
+		return (ft_putstr_fd("fork failed", 2), 1);
+	if (pid1 == 0)
+		child_funk(fd, argv[1], argv[2], envp);
+	if (waitpid(pid1, NULL, 0) == -1)
+		return (ft_putstr_fd("waitpid failed", 2), 1);
+	pid2 = fork();
+	if (pid2 == -1)
+		return (ft_putstr_fd("fork2 failed", 2), 1);
+	if (pid2 == 0)
+		child_2_funk(fd, argv[4], argv[3], envp);
+	close(fd[0]);
+	close(fd[1]);
+	if (waitpid(pid2, status, 0) == -1)
+		return (ft_putstr_fd("waitpid2 failed", 2), 1);
+	return (0);
+}
+
 int	main(int argc, char *argv[], char *envp[])
 {
 	int	fd[2];
-	int	pid1;
-	int	pid2;
 	int	status;
 
 	status = 0;
@@ -92,26 +114,8 @@ int	main(int argc, char *argv[], char *envp[])
 		return (ft_putstr_fd("Wrong number of arguments\n", 2), 1);
 	if (pipe(fd) == -1)
 		return (ft_putstr_fd("pipe failed", 2), 1);
-	{
-		pid1 = fork();
-		if (pid1 == -1)
-			return (ft_putstr_fd("fork failed", 2), 1);
-		if (pid1 == 0)
-			child_funk(fd, argv[1], argv[2], envp);
-	}
-	if (waitpid(pid1, NULL, 0) == -1)
-		return (ft_putstr_fd("waitpid failed", 2), 1);
-	{
-		pid2 = fork();
-		if (pid2 == -1)
-			return (ft_putstr_fd("fork2 failed", 2), 1);
-		if (pid2 == 0)
-			parent_funk(fd, argv[4], argv[3], envp);
-	}
-	close(fd[0]);
-	close(fd[1]);
-	if (waitpid(pid2, &status, 0) == -1)
-		return (ft_putstr_fd("waitpid2 failed", 2), 1);
+	if (pid_init(fd, &status, argv, envp) != 0)
+		return (1);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
 	return (0);

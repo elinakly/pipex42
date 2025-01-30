@@ -6,11 +6,12 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/29 19:35:54 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/30 18:05:22 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include <linux/limits.h>
 
 void	free_arr(char **arr)
 {
@@ -25,43 +26,31 @@ void	free_arr(char **arr)
 	free(arr);
 }
 
-static char	*find_valid_path(char *com, char **envp)
+static char	*find_valid_path(const char *com, char **envp)
 {
 	int		i;
 	char	**paths;
-	char	*path;
-	char	*find_full_path;
+	char	path[PATH_MAX];
 
 	i = 0;
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
 		i++;
 	if (!envp[i])
-		error();
+		error(2);
 	paths = ft_split(envp[i] + 5, ':');
 	if (!paths)
-		error();
+		error(2);
 	i = 0;
 	while (paths[i])
 	{
-		path = ft_strjoin(paths[i], "/");
-		if (!path)
-		{
-			free_arr(paths);
-			error();
-		}
-		find_full_path = ft_strjoin(path, com);
-		free(path);
-		if (!find_full_path)
-		{
-			free_arr(paths);
-			error();
-		}
-		if (access(find_full_path, F_OK) == 0)
-			return (free_arr(paths), find_full_path);
-		free(find_full_path);
+		ft_strlcpy(path, paths[i], PATH_MAX);
+		ft_strlcat(path, "/", PATH_MAX);
+		ft_strlcat(path, com, PATH_MAX);
+		if (access(path, F_OK) == 0)
+			return (free_arr(paths), ft_strdup(path));
 		i++;
 	}
-	return (free_arr(paths), NULL);
+	return (free_arr(paths), ft_strdup(com));
 }
 
 void	execute(char *com, char **envp)
@@ -71,22 +60,17 @@ void	execute(char *com, char **envp)
 
 	command = ft_split(com, ' ');
 	if (!command)
-	{
-		free(com);
-		error();
-	}
+		exit(error(3));
 	find_path = find_valid_path(command[0], envp);
 	if (!find_path)
 	{
-		free(com);
 		free_arr(command);
-		error();
+		exit(error(3));
 	}
 	if (execve(find_path, command, envp) == -1)
 	{
 		free(find_path);
-		free(com);
 		free_arr(command);
-		exit(127);
+		exit(error(127));
 	}
 }

@@ -106,8 +106,8 @@ int	pid_init(int *fd, int *status, char **argv, char **envp)
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	int	fd[2];
-	int	status;
+	pid_t	fd[2];
+	pid_t	status;
 
 	status = 0;
 	if (argc != 5)

@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/30 19:43:35 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/01/31 13:40:57 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void	execute(char *com, char **envp)
 	command = ft_split(com, ' ');
 	if (!command)
 		exit(error(3));
-	find_path = find_valid_path(command[0], envp); //malloc
+	find_path = find_valid_path(command[0], envp);
 	if (find_path == NULL)
 	{
 		free_arr(command);

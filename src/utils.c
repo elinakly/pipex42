@@ -61,6 +61,11 @@ void	execute(char *com, char **envp)
 	if (!command)
 		exit(error(3));
 	find_path = find_valid_path(command[0], envp);
+	if (command[0] == NULL)
+	{
+		free_arr(command);
+		exit(error(3));
+	}
 	if (find_path == NULL)
 	{
 		free_arr(command);

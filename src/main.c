@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/01/30 20:08:27 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/04 16:02:29 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	error(int status)
 		perror("Execve failed");
 	else if (status == 127)
 		ft_putstr_fd("Error: command not found\n", 2);
-	return (status);
+	exit (status);
 }
 
 static void	child_funk(int *fd, char *file1, char *cmd1, char **envp)
@@ -82,16 +82,14 @@ static void	child_2_funk(int *fd, char *file2, char *cmd2, char **envp)
 
 int	pid_init(int *fd, int *status, char **argv, char **envp)
 {
-	int	pid1;
-	int	pid2;
+	pid_t	pid1;
+	pid_t	pid2;
 
 	pid1 = fork();
 	if (pid1 == -1)
 		return (ft_putstr_fd("fork failed", 2), 1);
 	if (pid1 == 0)
 		child_funk(fd, argv[1], argv[2], envp);
-	if (waitpid(pid1, NULL, 0) == -1)
-		return (ft_putstr_fd("waitpid failed", 2), 1);
 	pid2 = fork();
 	if (pid2 == -1)
 		return (ft_putstr_fd("fork2 failed", 2), 1);
@@ -99,6 +97,8 @@ int	pid_init(int *fd, int *status, char **argv, char **envp)
 		child_2_funk(fd, argv[4], argv[3], envp);
 	close(fd[0]);
 	close(fd[1]);
+	if (waitpid(pid1, NULL, 0) == -1)
+		return (ft_putstr_fd("waitpid failed", 2), 1);
 	if (waitpid(pid2, status, 0) == -1)
 		return (ft_putstr_fd("waitpid2 failed", 2), 1);
 	return (0);
@@ -106,8 +106,8 @@ int	pid_init(int *fd, int *status, char **argv, char **envp)
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	pid_t	fd[2];
-	pid_t	status;
+	int	fd[2];
+	int	status;
 
 	status = 0;
 	if (argc != 5)
@@ -118,5 +118,5 @@ int	main(int argc, char *argv[], char *envp[])
 		return (1);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
-	return (0);
+	return (WIFSIGNALED(status));
 }

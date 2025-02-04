@@ -5,7 +5,7 @@ HEADERS	:= -I ./include
 CC = cc
 CFLAGS = -Wall -Werror -Wextra -g
 OBJS_DIR  = objs
-LIBS	:= libft/libft.a printf/libftprintf.a -ldl -lglfw -pthread -lm
+LIBS	:= libft/libft.a printf/libftprintf.a 
 
 SRCS = main.c utils.c
 

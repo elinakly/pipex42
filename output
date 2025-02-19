@@ -1,0 +1,15 @@
+total 52$
+drwxr-xr-x 9 eklymova student   171 feb 19 21:05 .$
+drwxr-xr-x 6 eklymova student    72 feb 19 21:00 ..$
+drwxr-xr-x 8 eklymova student   163 feb 19 15:25 .git$
+drwxr-xr-x 2 eklymova student    55 feb 19 15:25 include$
+-rw-r--r-- 1 eklymova student    11 feb 19 15:25 input$
+drwxr-xr-x 3 eklymova student  4096 feb 19 21:04 libft$
+-rw-r--r-- 1 eklymova student   756 feb 19 21:04 Makefile$
+drwxr-xr-x 2 eklymova student    50 feb 19 21:04 objs$
+-rwxr-xr-x 1 eklymova student     0 feb 19 21:05 output$
+-rwxr-xr-x 1 eklymova student 29288 feb 19 21:04 pipex$
+drwxr-xr-x 3 eklymova student  4096 feb 19 21:04 printf$
+-rw-r--r-- 1 eklymova student  1316 feb 19 15:25 README.md$
+drwxr-xr-x 2 eklymova student    71 feb 19 15:25 src$
+drwxr-xr-x 2 eklymova student    27 feb 19 15:25 .vscode$

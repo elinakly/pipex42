@@ -125,87 +125,104 @@ void	execute(char *com, char **envp)
 	}
 }
 
-void	child_process(char *argv, char **envp)
-{
-	pid_t	pid;
-	int		fd[2];
+// void	child_process(char *argv, char **envp)
+// {
+	// pid_t	pid;
+	// int		fd[2];
 
-	if (pipe(fd) == -1)
-		error(1);
-	pid = fork();
-	if (pid == -1)
-		error(1);
-	if (pid == 0)
+	// if (pipe(fd) == -1)
+	// 	error(1);
+	// pid = fork();
+	// if (pid == -1)
+	// 	error(1);
+	// if (pid == 0)
+	// {
+	// 	close(fd[0]);
+	// 	dup2(fd[1], STDOUT_FILENO);
+	// 	execute(argv, envp);
+	// }
+	// else
+	// {
+	// 	close(fd[1]);
+	// 	dup2(fd[0], STDIN_FILENO);
+	// 	waitpid(pid, NULL, 0);
+	// }
+// }
+
+void	child_process(int **pipes, int num_cmds, char *argv, char **envp)
+{
+	int i;
+	i = 0;
+	while (i < num_cmds)
 	{
-		close(fd[0]);
-		dup2(fd[1], STDOUT_FILENO);
-		execute(argv, envp);
-	}
-	else
-	{
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
-		waitpid(pid, NULL, 0);
+		if (fork() == 0)
+		{
+			if (i == 0)
+			{
+				open_file()
+				dup2(input_fd, STDIN_FILENO);
+				dup2(pipes[i][1], STDOUT_FILENO);
+			}
+			else if (i == num_cmds - 1)
+			{
+				dup2(pipes[i - 1][0], STDIN_FILENO);
+				dup2(output_fd, STDOUT_FILENO);
+			}
+			else
+			{
+				dup2(pipes[i - 1][0], STDIN_FILENO);
+				dup2(pipes[i][1], STDOUT_FILENO);
+			}
+			execute(argv[i + 2], envp);
+		}
+		i++;
 	}
 }
 
-int main(int argc, char *argv[], char *envp[])
+int	main(int argc, char *argv[], char *envp[])
 {
 	int		num_cmds;
-    int		pipes[argc - 4][2];
-    int		input_fd;
-    int		output_fd;
-    int		i;
+	int		**pipes;
+	int		input_fd;
+	int		output_fd;
+	int		i;
 
-    if (argc < 5)
-    {
-        ft_putstr_fd("Usage: ./pipex file1 cmd1 cmd2 ... cmdn file2\n", 2);
-        return (1);
-    }
-    num_cmds = argc - 3;
-    input_fd = open_file(argv[1], 2);
-    output_fd = open_file(argv[argc - 1], 1);
-
-    create_pipes(num_cmds, pipes);
-
-    for (i = 0; i < num_cmds; i++)
-    {
-        if (fork() == 0)
-        {
-            if (i == 0)
-            {
-                dup2(input_fd, STDIN_FILENO);
-                dup2(pipes[i][1], STDOUT_FILENO);
-            }
-            else if (i == num_cmds - 1)
-            {
-                dup2(pipes[i - 1][0], STDIN_FILENO);
-                dup2(output_fd, STDOUT_FILENO);
-            }
-			else
-            {
-                dup2(pipes[i - 1][0], STDIN_FILENO);
-                dup2(pipes[i][1], STDOUT_FILENO);
-            }
-            for (int j = 0; j < num_cmds - 1; j++)
-            {
-                close(pipes[j][0]);
-                close(pipes[j][1]);
-            }
-            execute(argv[i + 2], envp);
-        }
-    }
-
-    for (i = 0; i < num_cmds - 1; i++)
-    {
-        close(pipes[i][0]);
-        close(pipes[i][1]);
-    }
-    close(input_fd);
-    close(output_fd);
-
-    for (i = 0; i < num_cmds; i++)
-        wait(NULL);
-
-    return (0);
+	if (argc < 5)
+	{
+		ft_putstr_fd("Usage: ./pipex file1 cmd1 cmd2 ... cmdn file2\n", 2);
+		return (1);
+	}
+	num_cmds = argc - 3;
+	// input_fd = open_file(argv[1], 2);
+	// output_fd = open_file(argv[argc - 1], 1);
+	open_file(argv, i);
+	pipes = malloc(sizeof(int) * (num_cmds - 1));
+	if (!pipes)
+		return (1);
+	i = 0;
+	while (i < num_cmds - 1)
+	{
+		pipes[i] = malloc(sizeof(int) * 2);
+		if (!pipes[i])
+			return (1);
+		i++;
+	}
+	create_pipes(num_cmds, pipes);
+	child_process(pipes, num_cmds, argv, envp);
+	i = 0;
+	while (i < num_cmds - 1)
+	{
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+		i++;
+	}
+	close(input_fd);
+	close(output_fd);
+	i = 0;
+	while (i < num_cmds)
+	{
+		wait(NULL);
+		i++;
+	}
+	return (0);
 }

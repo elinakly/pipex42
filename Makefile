@@ -7,7 +7,7 @@ CFLAGS = -Wall -Werror -Wextra -g
 OBJS_DIR  = objs
 LIBS	:= libft/libft.a printf/libftprintf.a 
 
-SRCS = main.c utils.c
+SRCS = main.c utils.c bonus.c
 
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)
 

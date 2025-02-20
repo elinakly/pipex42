@@ -32,7 +32,7 @@ $(NAME): $(OBJS) libft/libft.a printf/libftprintf.a
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
 	
-bonus : $(OBJS_BONUS) 
+bonus : $(OBJS_BONUS) libft/libft.a printf/libftprintf.a
 	@$(CC) $(OBJS_BONUS) $(LIBS) $(HEADERS) -o $(NAME)
 
 clean:

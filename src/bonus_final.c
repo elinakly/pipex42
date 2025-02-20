@@ -3,29 +3,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <fcntl.h>
 #include "pipex.h"
-
-int	open_file(char *argv, int i)
-{
-	int	file;
-
-	file = 0;
-	if (i == 0)
-		file = open(argv, O_WRONLY | O_CREAT | O_APPEND, 0777);
-	else if (i == 1)
-		file = open(argv, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	else if (i == 2)
-		file = open(argv, O_RDONLY, 0777);
-	if (file == -1)
-		error(1);
-	return (file);
-}
 
 int	error(int status)
 {
@@ -42,7 +20,7 @@ int	error(int status)
 	exit (status);
 }
 
-void	create_pipes(int num_cmds, int pipes[][2])
+void	create_pipes(int num_cmds, int **pipes)
 {
 	int	i;
 
@@ -91,11 +69,11 @@ static char	*find_valid_path(const char *com, char **envp)
 		ft_strlcpy(path, paths[i], PATH_MAX);
 		ft_strlcat(path, "/", PATH_MAX);
 		ft_strlcat(path, com, PATH_MAX);
-		if (access(path, F_OK) == 0)
+		if (access(path, X_OK) == 0)
 			return (free_arr(paths), ft_strdup(path));
 		i++;
 	}
-	return (free_arr(paths), ft_strdup(com));
+	return (free_arr(paths), NULL);
 }
 
 void	execute(char *com, char **envp)
@@ -125,58 +103,58 @@ void	execute(char *com, char **envp)
 	}
 }
 
-// void	child_process(char *argv, char **envp)
-// {
-	// pid_t	pid;
-	// int		fd[2];
-
-	// if (pipe(fd) == -1)
-	// 	error(1);
-	// pid = fork();
-	// if (pid == -1)
-	// 	error(1);
-	// if (pid == 0)
-	// {
-	// 	close(fd[0]);
-	// 	dup2(fd[1], STDOUT_FILENO);
-	// 	execute(argv, envp);
-	// }
-	// else
-	// {
-	// 	close(fd[1]);
-	// 	dup2(fd[0], STDIN_FILENO);
-	// 	waitpid(pid, NULL, 0);
-	// }
-// }
-
-void	child_process(int **pipes, int num_cmds, char *argv, char **envp)
+void close_fd(int input_fd, int output_fd, int **pipes, int num_cmds)
 {
-	int i;
+	int	i;
+
+	close(input_fd);
+	close(output_fd);
 	i = 0;
-	while (i < num_cmds)
+	while (i < num_cmds - 1)
 	{
-		if (fork() == 0)
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+		i++;
+	}
+}
+
+void	child_process(int i, int num_cmds, int **pipes, int input_fd, int output_fd, char *argv[], char *envp[])
+{
+	if (i == 0)
+		dup2(input_fd, STDIN_FILENO);
+	else
+		dup2(pipes[i - 1][0], STDIN_FILENO);
+
+	if (i == num_cmds - 1)
+		dup2(output_fd, STDOUT_FILENO);
+	else
+		dup2(pipes[i][1], STDOUT_FILENO);
+	close_fd(input_fd, output_fd, pipes, num_cmds);
+	execute(argv[i + 2], envp);
+}
+
+int	**malloc_pipes(int num_cmds)
+{
+	int	i;
+	int	**pipes;
+
+	pipes = malloc(sizeof(int *) * (num_cmds - 1));
+	if (!pipes)
+		return (NULL);
+	i = 0;
+	while (i < num_cmds - 1)
+	{
+		pipes[i] = malloc(sizeof(int) * 2);
+		if (!pipes[i])
 		{
-			if (i == 0)
-			{
-				open_file()
-				dup2(input_fd, STDIN_FILENO);
-				dup2(pipes[i][1], STDOUT_FILENO);
-			}
-			else if (i == num_cmds - 1)
-			{
-				dup2(pipes[i - 1][0], STDIN_FILENO);
-				dup2(output_fd, STDOUT_FILENO);
-			}
-			else
-			{
-				dup2(pipes[i - 1][0], STDIN_FILENO);
-				dup2(pipes[i][1], STDOUT_FILENO);
-			}
-			execute(argv[i + 2], envp);
+			while (--i >= 0)
+				free(pipes[i]);
+			free(pipes);
+			return (NULL);
 		}
 		i++;
 	}
+	return (pipes);
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -186,6 +164,7 @@ int	main(int argc, char *argv[], char *envp[])
 	int		input_fd;
 	int		output_fd;
 	int		i;
+	pid_t	pid;
 
 	if (argc < 5)
 	{
@@ -193,36 +172,36 @@ int	main(int argc, char *argv[], char *envp[])
 		return (1);
 	}
 	num_cmds = argc - 3;
-	// input_fd = open_file(argv[1], 2);
-	// output_fd = open_file(argv[argc - 1], 1);
-	open_file(argv, i);
-	pipes = malloc(sizeof(int) * (num_cmds - 1));
+	input_fd = open(argv[1], O_RDONLY);
+	if (input_fd == -1)
+		return (1);
+	output_fd = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (output_fd == -1)
+		return (1);
+	pipes = malloc_pipes(num_cmds);
 	if (!pipes)
 		return (1);
-	i = 0;
-	while (i < num_cmds - 1)
-	{
-		pipes[i] = malloc(sizeof(int) * 2);
-		if (!pipes[i])
-			return (1);
-		i++;
-	}
 	create_pipes(num_cmds, pipes);
-	child_process(pipes, num_cmds, argv, envp);
 	i = 0;
-	while (i < num_cmds - 1)
+	while (i < num_cmds)
 	{
-		close(pipes[i][0]);
-		close(pipes[i][1]);
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork failed");
+			return (1);
+		}
+		if (pid == 0)
+			child_process(i, num_cmds, pipes, input_fd, output_fd, argv, envp);
 		i++;
 	}
-	close(input_fd);
-	close(output_fd);
+	close_fd(input_fd, output_fd, pipes, num_cmds);
 	i = 0;
 	while (i < num_cmds)
 	{
 		wait(NULL);
 		i++;
 	}
+	free(pipes);
 	return (0);
 }

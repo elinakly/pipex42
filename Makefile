@@ -7,10 +7,13 @@ CFLAGS = -Wall -Werror -Wextra -g
 OBJS_DIR  = objs
 LIBS	:= libft/libft.a printf/libftprintf.a 
 
-SRCS = main.c utils.c
+SRCS = main.c utils.c 
+
+SRCS_BONUS = bonus.c bonus_utils.c
 
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)
 
+OBJS_BONUS = $(SRCS_BONUS:%.c=$(OBJS_DIR)/%.o)
 all: $(NAME)
 
 libft/libft.a:
@@ -28,6 +31,9 @@ $(NAME): $(OBJS) libft/libft.a printf/libftprintf.a
 
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
+	
+bonus : $(OBJS_BONUS) 
+	@$(CC) $(OBJS_BONUS) $(LIBS) $(HEADERS) -o $(NAME)
 
 clean:
 	rm -rf $(OBJS_DIR)

@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 15:49:23 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/04 16:02:29 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/20 15:45:15 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,19 +104,19 @@ int	pid_init(int *fd, int *status, char **argv, char **envp)
 	return (0);
 }
 
-int	main(int argc, char *argv[], char *envp[])
-{
-	int	fd[2];
-	int	status;
+// int	main(int argc, char *argv[], char *envp[])
+// {
+// 	int	fd[2];
+// 	int	status;
 
-	status = 0;
-	if (argc != 5)
-		return (ft_putstr_fd("Wrong number of arguments\n", 2), 1);
-	if (pipe(fd) == -1)
-		return (ft_putstr_fd("pipe failed", 2), 1);
-	if (pid_init(fd, &status, argv, envp) != 0)
-		return (1);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
-	return (WIFSIGNALED(status));
-}
+// 	status = 0;
+// 	if (argc != 5)
+// 		return (ft_putstr_fd("Wrong number of arguments\n", 2), 1);
+// 	if (pipe(fd) == -1)
+// 		return (ft_putstr_fd("pipe failed", 2), 1);
+// 	if (pid_init(fd, &status, argv, envp) != 0)
+// 		return (1);
+// 	if (WIFEXITED(status))
+// 		return (WEXITSTATUS(status));
+// 	return (WIFSIGNALED(status));
+// }

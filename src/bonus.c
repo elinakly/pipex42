@@ -6,21 +6,21 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:34:38 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/20 13:51:17 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/20 20:25:46 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "pipex_bonus.h"
 
-void	close_fd(int input_fd, int output_fd, int **pipes, int num_cmds)
+void	close_fd(t_command commands, int **pipes)
 {
 	int	i;
 
-	close(input_fd);
-	close(output_fd);
+	close(commands.input_fd);
+	close(commands.output_fd);
 	i = 0;
-	while (i < num_cmds - 1)
+	while (i < commands.num_cmds - 1)
 	{
 		close(pipes[i][0]);
 		close(pipes[i][1]);
@@ -28,31 +28,37 @@ void	close_fd(int input_fd, int output_fd, int **pipes, int num_cmds)
 	}
 }
 
-void	child_process(int i, int num_cmds, int **pipes, int input_fd, int output_fd, char *argv[], char *envp[])
+void	child_process(int i, int **pipes, char *envp[], t_command commands)
 {
+	commands.input_fd = open(commands.args[1], O_RDONLY);
+	if (commands.input_fd == -1)
+		return ;
+	commands.output_fd = open(commands.args[commands.argc - 1],
+			O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (commands.output_fd == -1)
+		return ;
 	if (i == 0)
-		dup2(input_fd, STDIN_FILENO);
+		dup2(commands.input_fd, STDIN_FILENO);
 	else
 		dup2(pipes[i - 1][0], STDIN_FILENO);
-
-	if (i == num_cmds - 1)
-		dup2(output_fd, STDOUT_FILENO);
+	if (i == commands.num_cmds - 1)
+		dup2(commands.output_fd, STDOUT_FILENO);
 	else
 		dup2(pipes[i][1], STDOUT_FILENO);
-	close_fd(input_fd, output_fd, pipes, num_cmds);
-	execute(argv[i + 2], envp);
+	close_fd(commands, pipes);
+	execute(commands.args[i + 2], envp);
 }
 
-int	**malloc_pipes(int num_cmds)
+int	**malloc_pipes(t_command commands)
 {
 	int	i;
 	int	**pipes;
 
-	pipes = malloc(sizeof(int *) * (num_cmds - 1));
+	pipes = malloc(sizeof(int *) * (commands.num_cmds - 1));
 	if (!pipes)
 		return (NULL);
 	i = 0;
-	while (i < num_cmds - 1)
+	while (i < commands.num_cmds - 1)
 	{
 		pipes[i] = malloc(sizeof(int) * 2);
 		if (!pipes[i])
@@ -67,47 +73,45 @@ int	**malloc_pipes(int num_cmds)
 	return (pipes);
 }
 
-int	main(int argc, char *argv[], char *envp[])
+void	fork_plz(t_command commands, int **pipes, char **envp)
 {
-	int		num_cmds;
-	int		**pipes;
-	int		input_fd;
-	int		output_fd;
 	int		i;
 	pid_t	pid;
 
-	if (argc < 5)
-	{
-		ft_putstr_fd("Usage: ./pipex file1 cmd1 cmd2 ... cmdn file2\n", 2);
-		return (1);
-	}
-	num_cmds = argc - 3;
-	input_fd = open(argv[1], O_RDONLY);
-	if (input_fd == -1)
-		return (1);
-	output_fd = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (output_fd == -1)
-		return (1);
-	pipes = malloc_pipes(num_cmds);
-	if (!pipes)
-		return (1);
-	create_pipes(num_cmds, pipes);
 	i = 0;
-	while (i < num_cmds)
+	while (i < commands.num_cmds)
 	{
 		pid = fork();
 		if (pid == -1)
 		{
 			perror("fork failed");
-			return (1);
+			return ;
 		}
 		if (pid == 0)
-			child_process(i, num_cmds, pipes, input_fd, output_fd, argv, envp);
+			child_process(i, pipes, envp, commands);
 		i++;
 	}
-	close_fd(input_fd, output_fd, pipes, num_cmds);
+}
+
+int	main(int argc, char *argv[], char *envp[])
+{
+	int			**pipes;
+	int			i;
+	t_command	commands;
+
+	if (argc < 5)
+		return (ft_putstr_fd("Error\n", 2), 1);
+	commands.argc = argc;
+	commands.num_cmds = argc - 3;
+	commands.args = argv;
+	pipes = malloc_pipes(commands);
+	if (!pipes)
+		return (1);
+	create_pipes(commands.num_cmds, pipes);
+	fork_plz(commands, pipes, envp);
+	close_fd(commands, pipes);
 	i = 0;
-	while (i < num_cmds)
+	while (i < commands.num_cmds)
 	{
 		wait(NULL);
 		i++;

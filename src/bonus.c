@@ -6,10 +6,9 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:34:38 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/21 18:12:14 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/21 19:08:16 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "pipex_bonus.h"
 
@@ -28,21 +27,26 @@ void	close_fd(t_command commands, int **pipes)
 
 void	child_process(int i, int **pipes, char *envp[], t_command commands)
 {
-	commands.input_fd = open(commands.args[1], O_RDONLY);
-	if (commands.input_fd == -1)
-		return ;
-	commands.output_fd = open(commands.args[commands.argc - 1],
-			O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (commands.output_fd == -1)
-		return ;
 	if (i == 0)
-		dup2(commands.input_fd, STDIN_FILENO);
+	{
+		if (dup2(commands.input_fd, STDIN_FILENO) == -1)
+			error (1);
+	}
 	else
-		dup2(pipes[i - 1][0], STDIN_FILENO);
+	{
+		if (dup2(pipes[i - 1][0], STDIN_FILENO) == -1)
+			error (1);
+	}
 	if (i == commands.num_cmds - 1)
-		dup2(commands.output_fd, STDOUT_FILENO);
+	{
+		if (dup2(commands.output_fd, STDOUT_FILENO) == -1)
+			error (1);
+	}
 	else
-		dup2(pipes[i][1], STDOUT_FILENO);
+	{
+		if (dup2(pipes[i][1], STDOUT_FILENO) == -1)
+			error (1);
+	}
 	close(commands.input_fd);
 	close(commands.output_fd);
 	close_fd(commands, pipes);
@@ -79,6 +83,13 @@ void	fork_plz(t_command commands, int **pipes, char **envp)
 	pid_t	pid;
 
 	i = 0;
+	commands.input_fd = open(commands.args[1], O_RDONLY);
+	if (commands.input_fd == -1)
+		error (4);
+	commands.output_fd = open(commands.args[commands.argc - 1],
+			O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (commands.output_fd == -1)
+		error (4);
 	while (i < commands.num_cmds)
 	{
 		pid = fork();
@@ -100,6 +111,8 @@ int	main(int argc, char *argv[], char *envp[])
 	t_command	commands;
 
 	if (argc < 6)
+		return (ft_putstr_fd("Error\n", 2), 1);
+	if (argv[1][0] == '\0' || argv[2][0] == '\0' || argv[3][0] == '\0')
 		return (ft_putstr_fd("Error\n", 2), 1);
 	commands.argc = argc;
 	commands.num_cmds = argc - 3;

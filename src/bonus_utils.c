@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:34:41 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/21 18:08:10 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/21 19:06:03 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ int	error(int status)
 		ft_putstr_fd("Error: command not found\n", 2);
 	else if (status == 127)
 		ft_putstr_fd("Execve failed\n", 2);
+	else if (status == 4)
+		ft_putstr_fd("Error: open failed\n", 2);
 	exit (status);
 }
 

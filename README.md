@@ -16,11 +16,22 @@ Compile the program using:
 make
 ```
 
+Compile the bonus using:
+```sh
+make bonus
+```
+
 ### Running Pipex
 Run the executable with the following syntax:
 ```sh
 ./pipex file1 cmd1 cmd2 file2
 ```
+
+Run the bonus with the following syntax:
+```sh
+./pipex file1 cmd1 cmd2 ... cmdn file2
+```
+
 Where:
 - `file1`: Input file.
 - `cmd1`: First command to execute.
@@ -47,3 +58,5 @@ This will:
 - `execve()`
 - `waitpid()`
 - File handling functions (`open`, `close`, `access`)
+
+### Project has been evaluated with 100% score, but bonus hasn`t been submited!!

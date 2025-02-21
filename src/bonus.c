@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:34:38 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/20 20:25:46 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/21 18:12:14 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ void	close_fd(t_command commands, int **pipes)
 {
 	int	i;
 
-	close(commands.input_fd);
-	close(commands.output_fd);
 	i = 0;
 	while (i < commands.num_cmds - 1)
 	{
@@ -45,6 +43,8 @@ void	child_process(int i, int **pipes, char *envp[], t_command commands)
 		dup2(commands.output_fd, STDOUT_FILENO);
 	else
 		dup2(pipes[i][1], STDOUT_FILENO);
+	close(commands.input_fd);
+	close(commands.output_fd);
 	close_fd(commands, pipes);
 	execute(commands.args[i + 2], envp);
 }
@@ -99,7 +99,7 @@ int	main(int argc, char *argv[], char *envp[])
 	int			i;
 	t_command	commands;
 
-	if (argc < 5)
+	if (argc < 6)
 		return (ft_putstr_fd("Error\n", 2), 1);
 	commands.argc = argc;
 	commands.num_cmds = argc - 3;
@@ -116,6 +116,6 @@ int	main(int argc, char *argv[], char *envp[])
 		wait(NULL);
 		i++;
 	}
-	free(pipes);
+	free_arr(0, pipes, commands.num_cmds, 1);
 	return (0);
 }

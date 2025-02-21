@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:50:36 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/20 20:10:06 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/21 18:04:44 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,6 @@ typedef struct s_command
 void		execute(char *com, char **envp);
 int			error(int status);
 void		create_pipes(int num_cmds, int **pipes);
-void		free_arr(char **arr);
+void		free_arr(char **arr, int **pipes, int num_cmds, int status);
 
 #endif

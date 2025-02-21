@@ -6,7 +6,7 @@
 /*   By: eklymova <eklymova@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/20 13:34:41 by eklymova          #+#    #+#             */
-/*   Updated: 2025/02/20 20:22:59 by eklymova         ###   ########.fr       */
+/*   Updated: 2025/02/21 18:08:10 by eklymova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,17 +43,30 @@ void	create_pipes(int num_cmds, int **pipes)
 	}
 }
 
-void	free_arr(char **arr)
+void	free_arr(char **arr, int **pipes, int num_cmds, int status)
 {
 	int	i;
 
-	i = 0;
-	while (arr[i])
+	if (status == 0)
 	{
-		free(arr[i]);
-		i++;
+		i = 0;
+		while (arr[i])
+		{
+			free(arr[i]);
+			i++;
+		}
+		free(arr);
 	}
-	free(arr);
+	if (status == 1)
+	{
+		i = 0;
+		while (i < num_cmds - 1)
+		{
+			free(pipes[i]);
+			i++;
+		}
+		free(pipes);
+	}
 }
 
 static char	*find_valid_path(const char *com, char **envp)
@@ -77,10 +90,10 @@ static char	*find_valid_path(const char *com, char **envp)
 		ft_strlcat(path, "/", PATH_MAX);
 		ft_strlcat(path, com, PATH_MAX);
 		if (access(path, X_OK) == 0)
-			return (free_arr(paths), ft_strdup(path));
+			return (free_arr(paths, 0, 0, 0), ft_strdup(path));
 		i++;
 	}
-	return (free_arr(paths), NULL);
+	return (free_arr(paths, 0, 0, 0), NULL);
 }
 
 void	execute(char *com, char **envp)
@@ -94,18 +107,18 @@ void	execute(char *com, char **envp)
 	find_path = find_valid_path(command[0], envp);
 	if (command[0] == NULL)
 	{
-		free_arr(command);
+		free_arr(command, 0, 0, 0);
 		exit(error(3));
 	}
 	if (find_path == NULL)
 	{
-		free_arr(command);
+		free_arr(command, 0, 0, 0);
 		exit(error(127));
 	}
 	if (execve(find_path, command, envp) == -1)
 	{
 		free(find_path);
-		free_arr(command);
+		free_arr(command, 0, 0, 0);
 		exit(error(126));
 	}
 }
